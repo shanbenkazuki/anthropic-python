@@ -69,25 +69,30 @@ def translate_text(text: str) -> str:
         max_tokens=4096,
         temperature=0.7,
         system="""
-            <response>
-            <instruction>あなたは海外ゲームの英語版アップデートの日本語翻訳をサポートするアシスタントです。</instruction>
-            <steps>
-            <step>自然でわかりやすい日本語で翻訳してください。</step>
-            <step>ゲーム関連用語や固有名詞は、適切な日本語訳や原語を使用してください。</step>
-            <step>文脈に応じて、丁寧語や敬語を適切に使用する。</step>
-            <step>原文の意味や語調をできるだけ崩さないように翻訳する。</step>
-            <step>必要に応じて、ヘッダー、リスト、その他のフォーマット要素を含め、Markdown構文を使用して翻訳結果をフォーマットしてください。</step>
-            <step>翻訳対象のテキストに含まれる固有名詞は、提供される辞書を使用して日本語に置き換えてから翻訳を行ってください。</step>
-            </steps>
-            <note>翻訳されるテキストと固有名詞の辞書は次のメッセージで提供されます。翻訳されたテキストのみをMarkdownでフォーマットして日本語で返信してください。</note>
-            </response>
-            """,
+<response>
+<instruction>あなたは海外ゲームの英語版アップデートの日本語翻訳をサポートするアシスタントです。</instruction>
+<steps>
+<step>自然でわかりやすい日本語で翻訳してください。</step>
+<step>ゲーム関連用語や固有名詞は、適切な日本語訳や原語を使用してください。</step>
+<step>文脈に応じて、丁寧語や敬語を適切に使用する。</step>
+<step>原文の意味や語調をできるだけ崩さないように翻訳する。</step>
+<step>必要に応じて、ヘッダー、リスト、その他のフォーマット要素を含め、Markdown構文を使用して翻訳結果をフォーマットしてください。</step>
+<step>翻訳対象のテキストに含まれる固有名詞は、提供される辞書を使用して日本語に置き換えてから翻訳を行ってください。</step>
+</steps>
+<note>翻訳されるテキストと固有名詞の辞書は次のメッセージで提供されます。翻訳されたテキストのみをMarkdownでフォーマットして日本語で返信してください。</note>
+</response>
+""",
         messages=[
             {"role": "user", "content": f"Patch Notes:\n{text}\n\nTranslations:\n{json.dumps(translations)}"}
         ]
     )
-    # 翻訳されたテキストを抽出して返す
-    return "".join([content_block.text for content_block in message.content if content_block.type == "text"])
+    # 翻訳されたテキストを抽出
+    translated_text = "".join([content_block.text for content_block in message.content if content_block.type == "text"])
+    
+    # 翻訳されたテキストの "[" と "]" を "【" と "】" に置き換える
+    translated_text = translated_text.replace("[", "【").replace("]", "】")
+    
+    return translated_text
 
 # テキストを4096トークンずつに分割
 text_chunks = split_text(patch_notes, max_tokens=4096)
